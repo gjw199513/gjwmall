@@ -1,7 +1,6 @@
 *.class
 
 #package File
-
 *.war
 *.ear
 
@@ -26,6 +25,8 @@ target/
 # temp File
 *.log
 *.cache
+*.diff
+*.patch
 *.tmp
 
 # system ignore

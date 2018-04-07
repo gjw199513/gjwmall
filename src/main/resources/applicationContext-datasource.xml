@@ -11,6 +11,7 @@
 
     <context:component-scan base-package="com.mmall" annotation-config="true"/>
 
+    <!--将常量进行分离-->
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="order" value="2"/>
@@ -23,7 +24,7 @@
         <property name="fileEncoding" value="utf-8"/>
     </bean>
 
-
+    <!--数据库用到dbcp的连接池-->
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${db.driverClassName}"/>
         <property name="url" value="${db.url}"/>
