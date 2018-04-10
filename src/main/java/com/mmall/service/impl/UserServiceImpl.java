@@ -25,34 +25,39 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServerResponse<User> login(String username, String password) {
+        // 统计用户数
         int resultCount = userMapper.checkUsername(username);
+        // 检查用户名是否存在
         if (resultCount == 0) {
             return ServerResponse.createByErrorMessage("用户名不存在");
         }
 
-
+        // 登录md5加密
         String md5Password = MD5Util.MD5EncodeUtf8(password);
+        // 检验用户名、密码一致性
         User user = userMapper.selectLogin(username, md5Password);
         if (user == null) {
             return ServerResponse.createByErrorMessage("密码错误");
         }
 
+        // 将密码置为空，不返回密码的值
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess("登录成功", user);
     }
 
 
     public ServerResponse<String> register(User user) {
-
+        // 用户名校验
         ServerResponse validResponse = this.checkValid(user.getUsername(), Const.USERNAME);
         if (!validResponse.isSuccess()) {
             return validResponse;
         }
+        // 邮箱校验
         validResponse = this.checkValid(user.getEmail(), Const.EMAIL);
         if (!validResponse.isSuccess()) {
             return validResponse;
         }
-
+        // role的类型
         user.setRole(Const.Role.ROLE_CUSTOMER);
         //MD5加密
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
@@ -64,6 +69,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     public ServerResponse<String> checkValid(String str, String type) {
+        // 使用isNotBlank传空值为假
         if (org.apache.commons.lang3.StringUtils.isNotBlank(type)) {
             //开始校验
             if (Const.USERNAME.equals(type)) {
@@ -118,14 +124,15 @@ public class UserServiceImpl implements IUserService {
             //用户不存在
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-
+        // token校验
         String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
         if (StringUtils.isBlank(token)) {
             return ServerResponse.createByErrorMessage("token无效或者过期");
         }
-
+        // StringUtils可以防止空指针异常
         if (StringUtils.equals(forgetToken, token)) {
             String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
+            // 密码需要使用新更改的md5加密的密码
             int rowCount = userMapper.updatePasswordByUsername(username, md5Password);
 
             if (rowCount > 0) {
@@ -183,10 +190,13 @@ public class UserServiceImpl implements IUserService {
 
 
     //backend
-    /*
-    * 校验是否是管理员
-    *
-    */
+
+    /**
+     * 校验是否是管理员
+     *
+     * @param user
+     * @return
+     */
     public ServerResponse checkAdminRole(User user) {
         if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
             return ServerResponse.createBySuccess();

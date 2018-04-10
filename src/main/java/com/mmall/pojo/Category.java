@@ -87,6 +87,7 @@ public class Category {
         this.updateTime = updateTime;
     }
 
+    // 处理set对于对象时，equals和hashCode均需重写
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

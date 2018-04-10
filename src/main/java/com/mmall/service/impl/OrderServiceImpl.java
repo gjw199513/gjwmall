@@ -106,11 +106,20 @@ public class OrderServiceImpl implements IOrderService {
 
     }
 
+
+    /**
+     * order和orderitem组装
+     *
+     * @param order
+     * @param orderItemList
+     * @return
+     */
     private OrderVo assembleOrderVo(Order order, List<OrderItem> orderItemList) {
         OrderVo orderVo = new OrderVo();
         orderVo.setOrderNo(order.getOrderNo());
         orderVo.setPayment(order.getPayment());
         orderVo.setPaymentType(order.getPaymentType());
+        // 获取支付类型码
         orderVo.setPaymentTypeDesc(Const.PaymentTypeEnum.codeOf(order.getPaymentType()).getValue());
 
         orderVo.setPostage(order.getPostage());
@@ -143,6 +152,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
+    /**
+     * 组装orderitem
+     * @param orderItem
+     * @return
+     */
     private OrderItemVo assembleOrderItemVo(OrderItem orderItem) {
         OrderItemVo orderItemVo = new OrderItemVo();
         orderItemVo.setOrderNo(orderItem.getOrderNo());
@@ -158,6 +172,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
+    /**
+     * 组装shipping
+     * @param shipping
+     * @return
+     */
     private ShippingVo assembleShippingVo(Shipping shipping) {
         ShippingVo shippingVo = new ShippingVo();
         shippingVo.setReceiverName(shipping.getReceiverName());
@@ -171,20 +190,40 @@ public class OrderServiceImpl implements IOrderService {
         return shippingVo;
     }
 
+
+    /**
+     * 清空购物车
+     * @param cartList
+     */
     private void cleanCart(List<Cart> cartList) {
         for (Cart cart : cartList) {
             cartMapper.deleteByPrimaryKey(cart.getId());
         }
     }
 
+
+    /**
+     * 减少库存
+     * @param orderItemList
+     */
     private void reduceProductStock(List<OrderItem> orderItemList) {
         for (OrderItem orderItem : orderItemList) {
+            // 获取商品
             Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+            // 修改库存
             product.setStock(product.getStock() - orderItem.getQuantity());
             productMapper.updateByPrimaryKey(product);
         }
     }
 
+
+    /**
+     * 组装订单对象
+     * @param userId
+     * @param shippingId
+     * @param payment
+     * @return
+     */
     private Order assembleOrder(Integer userId, Integer shippingId, BigDecimal payment) {
         Order order = new Order();
         long orderNo = this.generateOrderNo();
@@ -204,11 +243,22 @@ public class OrderServiceImpl implements IOrderService {
         return null;
     }
 
+
+    /**
+     * 生成订单号
+     * @return
+     */
     private long generateOrderNo() {
         long currentTime = System.currentTimeMillis();
         return currentTime + new Random().nextInt(100);
     }
 
+
+    /**
+     * 订单总价
+     * @param orderItemList
+     * @return
+     */
     private BigDecimal getOrderTotalPrice(List<OrderItem> orderItemList) {
         BigDecimal payment = new BigDecimal("0");
         for (OrderItem orderItem : orderItemList) {
@@ -217,6 +267,12 @@ public class OrderServiceImpl implements IOrderService {
         return payment;
     }
 
+    /**
+     * 获得购物车
+     * @param userId
+     * @param cartList
+     * @return
+     */
     private ServerResponse<List<OrderItem>> getCartOrderItem(Integer userId, List<Cart> cartList) {
         List<OrderItem> orderItemList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(cartList)) {
@@ -226,6 +282,7 @@ public class OrderServiceImpl implements IOrderService {
         //校验购物车的数据，包括产品的状态和数量
         for (Cart cartItem : cartList) {
             OrderItem orderItem = new OrderItem();
+            // 从购物车中获取产品
             Product product = productMapper.selectByPrimaryKey(cartItem.getProductId());
             if (Const.ProductStatusEnum.ON_SALE.getCode() != product.getStatus()) {
                 return ServerResponse.createByErrorMessage("产品" + product.getName() + "不是在线售卖状态");
@@ -251,6 +308,7 @@ public class OrderServiceImpl implements IOrderService {
 
     public ServerResponse pay(Long orderNo, Integer userId, String path) {
         Map<String, String> resultMap = Maps.newHashMap();
+        // 查询该用户是否存在该订单
         Order order = orderMapper.selectByUserIdAndOrderNo(userId, orderNo);
         if (order == null) {
             return ServerResponse.createByErrorMessage("用户没有该订单");
@@ -296,7 +354,7 @@ public class OrderServiceImpl implements IOrderService {
 
         // 商品明细列表，需填写购买商品详细信息，
         List<GoodsDetail> goodsDetailList = new ArrayList<GoodsDetail>();
-
+        // 该用户的订单
         List<OrderItem> orderItemList = orderItemMapper.getByOrderNoUserId(orderNo, userId);
         for (OrderItem orderItem : orderItemList) {
             GoodsDetail goods = GoodsDetail.newInstance(orderItem.getProductId().toString(), orderItem.getProductName(),
@@ -333,6 +391,7 @@ public class OrderServiceImpl implements IOrderService {
                 AlipayTradePrecreateResponse response = result.getResponse();
                 dumpResponse(response);
 
+                // 生成二维码，将二维码传回服务器，拼接url传回前端
                 File folder = new File(path);
                 if (!folder.exists()) {
                     folder.setWritable(true);
@@ -380,6 +439,11 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
+    /**
+     * 支付宝回调
+     * @param params
+     * @return
+     */
     public ServerResponse aliCallback(Map<String, String> params) {
         Long orderNo = Long.parseLong(params.get("out_trade_no"));
         String tradeNo = params.get("trade_no");
@@ -466,6 +530,13 @@ public class OrderServiceImpl implements IOrderService {
         return ServerResponse.createBySuccess(orderProductVo);
     }
 
+
+    /**
+     * 获取订单详情
+     * @param userId
+     * @param orderNo
+     * @return
+     */
     public ServerResponse<OrderVo> getOrderDetail(Integer userId, Long orderNo) {
         Order order = orderMapper.selectByUserIdAndOrderNo(userId, orderNo);
         if (order != null) {
@@ -476,6 +547,13 @@ public class OrderServiceImpl implements IOrderService {
         return ServerResponse.createByErrorMessage("没有找到该订单");
     }
 
+    /**
+     * 订单列表
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public ServerResponse<PageInfo> getOrderList(Integer userId, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         List<Order> orderList = orderMapper.selectByUserId(userId);
@@ -485,11 +563,18 @@ public class OrderServiceImpl implements IOrderService {
         return ServerResponse.createBySuccess(pageResult);
     }
 
+    /**
+     * userid和orderlist组装
+     * @param orderList
+     * @param userId
+     * @return
+     */
     private List<OrderVo> assembleOrderVoList(List<Order> orderList, Integer userId) {
         List<OrderVo> orderVoList = Lists.newArrayList();
         for (Order order : orderList) {
             List<OrderItem> orderItemList = Lists.newArrayList();
             if (userId == null) {
+                // 管理员查询不需要传useid
                 orderItemList = orderItemMapper.getByOrderNo(order.getOrderNo());
             } else {
                 orderItemList = orderItemMapper.getByOrderNoUserId(order.getOrderNo(), userId);
@@ -503,9 +588,16 @@ public class OrderServiceImpl implements IOrderService {
 
     //backend
 
+    /**
+     * 后台订单list页
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public ServerResponse<PageInfo> manageList(int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         List<Order> orderList = orderMapper.selectAllOrder();
+        // 管理员无需传入userid
         List<OrderVo> orderVoList = this.assembleOrderVoList(orderList, null);
         PageInfo pageResult = new PageInfo(orderList);
         pageResult.setList(orderVoList);
@@ -523,6 +615,14 @@ public class OrderServiceImpl implements IOrderService {
         return ServerResponse.createByErrorMessage("订单不存在");
     }
 
+
+    /**
+     * 后台查询
+     * @param orderNo
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public ServerResponse<PageInfo> manageSearch(Long orderNo, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         Order order = orderMapper.selectByOrderNo(orderNo);

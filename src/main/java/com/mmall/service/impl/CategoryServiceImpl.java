@@ -28,6 +28,7 @@ public class CategoryServiceImpl implements ICategoryService {
     private CategoryMapper categoryMapper;
 
     public ServerResponse addCategory(String categoryName, Integer parentId) {
+        // 父节点为空或者分类名为空
         if (parentId == null || StringUtils.isBlank(categoryName)) {
             return ServerResponse.createByErrorMessage("添加品类参数错误");
         }
@@ -60,6 +61,7 @@ public class CategoryServiceImpl implements ICategoryService {
 
     public ServerResponse<List<Category>> getChildrenParallelCategory(Integer categoryId) {
         List<Category> categoryList = categoryMapper.selectCategoryChildrenByParentId(categoryId);
+        // isEmpty判断集合和集合内元素均为空
         if (CollectionUtils.isEmpty(categoryList)) {
             logger.info("未找到当前分类的子分类");
         }
@@ -70,9 +72,11 @@ public class CategoryServiceImpl implements ICategoryService {
     * 递归查询本节点的id及孩子节点的id
     * */
     public ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId) {
+        // 初始化set
         Set<Category> categorySet = Sets.newHashSet();
         findChildCategory(categorySet, categoryId);
 
+        // 初始化list
         List<Integer> categoryIdList = Lists.newArrayList();
         if (categoryId != null) {
             for (Category categoryItem : categorySet) {
@@ -89,6 +93,11 @@ public class CategoryServiceImpl implements ICategoryService {
             categorySet.add(category);
         }
         //查找子节点，递归算法一定要有一个退出条件
+        // 字节点为空，退出递归
+        /*
+            mybatis查询返回的结果不会返回null，因此不用判断
+            对于绝大多数，在遍历时需要判断是否为空，否则报空指针异常
+         */
         List<Category> categoryList = categoryMapper.selectCategoryChildrenByParentId(categoryId);
         for (Category categoryItem : categoryList) {
             findChildCategory(categorySet, categoryItem.getId());

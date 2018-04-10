@@ -43,6 +43,7 @@ public class ShippingServiceImpl implements IShippingService {
 
     public ServerResponse update(Integer userId, Shipping shipping) {
         shipping.setUserId(userId);
+        // 修改地址，不能修改id
         int rowCount = shippingMapper.updateByShipping(shipping);
         if (rowCount > 0) {
             return ServerResponse.createBySuccess("更新地址成功");

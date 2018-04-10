@@ -48,6 +48,13 @@ public class OrderController {
     }
 
 
+    /**
+     * 取消订单
+     *
+     * @param session
+     * @param orderNo
+     * @return
+     */
     @RequestMapping("cancel.do")
     @ResponseBody
     public ServerResponse cancel(HttpSession session, Long orderNo) {
@@ -89,7 +96,13 @@ public class OrderController {
     }
 
 
-
+    /**
+     * 支付宝支付
+     * @param session
+     * @param orderNo
+     * @param request
+     * @return
+     */
     @RequestMapping("pay.do")
     @ResponseBody
     public ServerResponse pay(HttpSession session, Long orderNo, HttpServletRequest request) {
@@ -97,10 +110,16 @@ public class OrderController {
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
+        // 获取文件路径
         String path = request.getSession().getServletContext().getRealPath("upload");
         return iOrderService.pay(orderNo, user.getId(), path);
     }
 
+    /**
+     * 支付宝回调
+     * @param request
+     * @return
+     */
     @RequestMapping("alipay_callback.do")
     @ResponseBody
     public Object alipayCallback(HttpServletRequest request) {
@@ -141,6 +160,13 @@ public class OrderController {
         return Const.AlipayCallback.RESPONSE_FAILED;
     }
 
+
+    /**
+     * 支付宝轮询查订单状态
+     * @param session
+     * @param orderNo
+     * @return
+     */
     @RequestMapping("query_order_pay_status.do")
     @ResponseBody
     public ServerResponse<Boolean> queryOrderPayStatus(HttpSession session, Long orderNo) {

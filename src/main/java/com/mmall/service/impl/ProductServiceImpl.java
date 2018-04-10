@@ -43,13 +43,16 @@ public class ProductServiceImpl implements IProductService {
 
     public ServerResponse saveOrUpdateProduct(Product product) {
         if (product != null) {
+            // 判断子图是否为空
             if (StringUtils.isNotBlank(product.getSubImages())) {
+                // 将子图字段用逗号分隔，并放入String的list
                 String[] subImageArray = product.getSubImages().split(",");
                 if (subImageArray.length > 0) {
+                    // 将子图的第一个设置为主图
                     product.setMainImage(subImageArray[0]);
                 }
             }
-
+            // 更新id不为空
             if (product.getId() != null) {
                 int rowCount = productMapper.updateByPrimaryKey(product);
                 if (rowCount > 0) {
@@ -94,6 +97,12 @@ public class ProductServiceImpl implements IProductService {
         return ServerResponse.createBySuccess(productDetailVo);
     }
 
+    /**
+     * 通过product组装ProductDetailVo
+     *
+     * @param product
+     * @return
+     */
     private ProductDetailVo assembleProductDetailVo(Product product) {
         ProductDetailVo productDetailVo = new ProductDetailVo();
         productDetailVo.setId(product.getId());
@@ -123,9 +132,8 @@ public class ProductServiceImpl implements IProductService {
 
     public ServerResponse<PageInfo> getProductList(int pageNum, int pageSize) {
         //startPage--start
-        //填充自己的sql查询逻辑
-        //pageHelper-收尾
         PageHelper.startPage(pageNum, pageSize);
+        //填充自己的sql查询逻辑
         List<Product> productList = productMapper.selectList();
 
         List<ProductListVo> productListVoList = Lists.newArrayList();
@@ -133,6 +141,7 @@ public class ProductServiceImpl implements IProductService {
             ProductListVo productListVo = assembleProductListVo(productItem);
             productListVoList.add(productListVo);
         }
+        //pageHelper-收尾
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(productListVoList);
         return ServerResponse.createBySuccess(pageResult);
@@ -188,6 +197,7 @@ public class ProductServiceImpl implements IProductService {
         if (StringUtils.isBlank(keyword) && categoryId == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
+        // 将分类的信息保存在list中
         List<Integer> categoryIdList = new ArrayList<Integer>();
         if (categoryId != null) {
             Category category = categoryMapper.selectByPrimaryKey(categoryId);
@@ -209,6 +219,7 @@ public class ProductServiceImpl implements IProductService {
         if (StringUtils.isNotBlank(orderBy)) {
             if (Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)) {
                 String[] orderByArray = orderBy.split("_");
+                // 分页要求拼接成：price desc
                 PageHelper.orderBy(orderByArray[0] + " " + orderByArray[1]);
             }
         }

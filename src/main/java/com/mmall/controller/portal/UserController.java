@@ -23,32 +23,44 @@ public class UserController {
     @Autowired
     private IUserService iUserService;
 
-    /*
-        用户登录
+    /**
+     * 用户登录
+     * @param username
+     * @param password
+     * @param session
+     * @return
      */
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
+    // 将返回值序列化为json
     @ResponseBody
+    // 传入session
     public ServerResponse<User> login(String username, String password, HttpSession session) {
         //service-->mybatis-->dao
         ServerResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
+            // 设置session的值
             session.setAttribute(Const.CURRENT_USER, response.getData());
         }
         return response;
     }
 
-    /*
-        登出
+    /**
+     * 登出
+     * @param session
+     * @return
      */
     @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> logout(HttpSession session) {
+        // 将session值移除
         session.removeAttribute(Const.CURRENT_USER);
         return ServerResponse.createBySuccess();
     }
 
-    /*
-        注册
+    /**
+     * 注册
+     * @param user
+     * @return
      */
     @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
@@ -57,6 +69,13 @@ public class UserController {
         return iUserService.register(user);
     }
 
+    /**
+     * 校验
+     *
+     * @param str
+     * @param type
+     * @return
+     */
     @RequestMapping(value = "check_valid.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> checkValid(String str, String type) {
@@ -64,6 +83,11 @@ public class UserController {
         return iUserService.checkValid(str, type);
     }
 
+    /**
+     * 获取用户信息
+     * @param session
+     * @return
+     */
     @RequestMapping(value = "get_user_info.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<User> getUserInfo(HttpSession session) {
@@ -74,6 +98,11 @@ public class UserController {
         return ServerResponse.createByErrorMessage("用户未登录，无法获取当前用户的信息");
     }
 
+    /**
+     * 忘记密码
+     * @param username
+     * @return
+     */
     @RequestMapping(value = "forget_get_question.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> forgetGetQuestion(String username) {

@@ -17,6 +17,9 @@ public class PropertiesUtil {
 
     private static Properties props;
 
+    // 在tomcat启动时读取配置，需要提前执行
+    // 静态代码块优先于普通代码块，普通代码块优先于静态代码块
+    // 静态代码块只执行一次，一般用于初始化静态变量
     static {
         String fileName = "mmall.properties";
         props = new Properties();
@@ -27,6 +30,12 @@ public class PropertiesUtil {
         }
     }
 
+    /**
+     * 获取属性
+     *
+     * @param key
+     * @return
+     */
     public static String getProperty(String key) {
         String value = props.getProperty(key.trim());
         if (StringUtils.isBlank(value)) {
@@ -35,6 +44,12 @@ public class PropertiesUtil {
         return value.trim();
     }
 
+    /**
+     * 获取属性，设置默认值
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     public static String getProperty(String key, String defaultValue) {
 
         String value = props.getProperty(key.trim());

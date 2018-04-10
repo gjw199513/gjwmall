@@ -15,6 +15,7 @@ public class Const {
     public static final String USERNAME = "username";
 
     public interface ProductListOrderBy {
+        // 集合类常量
         Set<String> PRICE_ASC_DESC = Sets.newHashSet("price_desc", "price_asc");
     }
 

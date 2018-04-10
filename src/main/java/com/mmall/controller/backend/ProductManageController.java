@@ -114,6 +114,7 @@ public class ProductManageController {
 
     @RequestMapping("upload.do")
     @ResponseBody
+    // 更具上下文动态创建路径
     public ServerResponse upload(HttpSession session, @RequestParam(value = "upload_file", required = false) MultipartFile file, HttpServletRequest request) {
         User user = (User) session.getAttribute((Const.CURRENT_USER));
         if (user == null) {
@@ -125,7 +126,7 @@ public class ProductManageController {
             String url = PropertiesUtil.getProperty("ftp.server.http.prefix") + targetFileName;
 
             Map fileMap = Maps.newHashMap();
-            fileMap.put("url", targetFileName);
+            fileMap.put("uri", targetFileName);
             fileMap.put("url", url);
             return ServerResponse.createBySuccess(fileMap);
         } else {
@@ -144,7 +145,13 @@ public class ProductManageController {
             return resultMap;
         }
         //富文本中对于返回值有自己的要求，我们使用simditor所以按照simditor的要求进行返回
-
+        /*
+        {
+            "success": true/false,
+            "msg": "error message", # optional
+            "file_path": "[real file path]"
+        }
+         */
         if (iUserService.checkAdminRole(user).isSuccess()) {
             String path = request.getSession().getServletContext().getRealPath("upload");
             String targetFileName = iFileService.upload(file, path);
@@ -157,7 +164,7 @@ public class ProductManageController {
             resultMap.put("success", true);
             resultMap.put("msg", "上传成功");
             resultMap.put("file_path", url);
-
+            // 富文本上传文件要去
             response.addHeader("Access-Control-Allow_Headers", "X-File-Name");
             return resultMap;
         } else {
