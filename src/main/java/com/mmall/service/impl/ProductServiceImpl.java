@@ -143,6 +143,7 @@ public class ProductServiceImpl implements IProductService {
         }
         //pageHelper-收尾
         PageInfo pageResult = new PageInfo(productList);
+        // ProductListVo是前端展示的数据，而productList为了分页使用，需要将pageResult重置为ProductListVo的数据
         pageResult.setList(productListVoList);
         return ServerResponse.createBySuccess(pageResult);
 
