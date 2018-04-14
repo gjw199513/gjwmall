@@ -22,6 +22,7 @@ public class PropertiesUtil {
     // 在tomcat启动时读取配置，需要提前执行
     // 静态代码块优先于普通代码块，普通代码块优先于静态代码块
     // 静态代码块只执行一次，一般用于初始化静态变量
+    // 获取配置文件
     static {
         String fileName = "mmall.properties";
         props = new Properties();
