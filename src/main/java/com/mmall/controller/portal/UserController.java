@@ -39,11 +39,16 @@ public class UserController {
      * @param session
      * @return
      */
-    @RequestMapping(value = "login.do", method = RequestMethod.POST)
+    @RequestMapping(value = "login.do", method = RequestMethod.GET)
     // 将返回值序列化为json
     @ResponseBody
     // 传入session
     public ServerResponse<User> login(String username, String password, HttpSession session, HttpServletResponse httpServletResponse) {
+        // 测试全局异常
+        int i = 0;
+        int j = 66 / i;
+
+
         //service-->mybatis-->dao
         ServerResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {

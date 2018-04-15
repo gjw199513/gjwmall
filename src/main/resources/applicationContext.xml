@@ -10,8 +10,13 @@
      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <!--扫描com.mmall下的注解，方便类的注入-->
-    <context:component-scan base-package="com.mmall" annotation-config="true"/>
+    <context:component-scan base-package="com.mmall" annotation-config="true">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"></context:exclude-filter>
+    </context:component-scan>
 
+
+    <!--对注册的bean进行操作的配置-->
     <!--<context:annotation-config/>-->
     <aop:aspectj-autoproxy/>
 
