@@ -45,8 +45,8 @@ public class UserController {
     // 传入session
     public ServerResponse<User> login(String username, String password, HttpSession session, HttpServletResponse httpServletResponse) {
         // 测试全局异常
-        int i = 0;
-        int j = 66 / i;
+//        int i = 0;
+//        int j = 66 / i;
 
 
         //service-->mybatis-->dao
