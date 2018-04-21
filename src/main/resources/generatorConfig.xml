@@ -68,7 +68,11 @@
             <property name="enableSubPackages" value="false" />
         </javaClientGenerator>
 
-
+        <!--
+            tableName:与数据库内的表名一致
+            domainObjectName：生成java的类名
+            enableCountByExample：是否通过对象查数量
+        -->
         <table tableName="mmall_shipping" domainObjectName="Shipping" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
         <table tableName="mmall_cart" domainObjectName="Cart" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
         <table tableName="mmall_cart_item" domainObjectName="CartItem" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>

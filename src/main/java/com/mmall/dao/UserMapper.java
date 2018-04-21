@@ -20,6 +20,7 @@ public interface UserMapper {
 
     int checkEmail(String email);
 
+    // 传入多个参数，需要Param注解，sql传入的参数使用注解中的值
     User selectLogin(@Param("username") String username, @Param("password") String password);
 
     String selectQuestionByUsername(String username);

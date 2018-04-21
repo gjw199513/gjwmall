@@ -40,7 +40,7 @@ public class CartServiceImpl implements ICartService {
 
         Cart cart = cartMapper.selectCartByUserIdProductId(userId, productId);
         if (cart == null) {
-            //这个产品不再这个购物车里，需要新增一个这个产品的记录
+            //这个产品不在这个购物车里，需要新增一个这个产品的记录
             Cart cartItem = new Cart();
             cartItem.setQuantity(count);
             cartItem.setChecked(Const.Cart.CHECKED);
@@ -70,6 +70,7 @@ public class CartServiceImpl implements ICartService {
     }
 
     public ServerResponse<CartVo> deleteProduct(Integer userId, String productIds) {
+        // 使用guava的Splitter方法，可以用分隔符将字符串转成list
         List<String> productList = Splitter.on(",").splitToList(productIds);
         if (CollectionUtils.isEmpty(productList)) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
@@ -84,6 +85,15 @@ public class CartServiceImpl implements ICartService {
         return ServerResponse.createBySuccess(cartVo);
     }
 
+    /**
+     * 全选和全反选
+     * 选中和反选
+     *
+     * @param userId
+     * @param productId
+     * @param checked
+     * @return
+     */
     public ServerResponse<CartVo> selectOrUnSelect(Integer userId, Integer productId, Integer checked) {
         cartMapper.checkedOrUncheckedProduct(userId, productId, checked);
         return this.list(userId);
@@ -105,6 +115,7 @@ public class CartServiceImpl implements ICartService {
 
         BigDecimal cartTotalPrice = new BigDecimal("0");
 
+        // 购物车不是空
         if (CollectionUtils.isNotEmpty(cartList)) {
             for (Cart cartItem : cartList) {
                 CartProductVo cartProductVo = new CartProductVo();
@@ -146,6 +157,7 @@ public class CartServiceImpl implements ICartService {
                     //如果已经勾选，增加到整个购物车的总价中
                     cartTotalPrice = BigDecimalUtil.add(cartTotalPrice.doubleValue(), cartProductVo.getProductTotalPrice().doubleValue());
                 }
+                // 将单个的cartProduct加入列表中
                 cartProductVoList.add(cartProductVo);
             }
         }
@@ -157,6 +169,11 @@ public class CartServiceImpl implements ICartService {
         return cartVo;
     }
 
+    /**
+     * 查询用户所有选中状态的商品
+     * @param userId
+     * @return
+     */
     private boolean getAllCheckedStatus(Integer userId) {
         if (userId == null) {
             return false;
