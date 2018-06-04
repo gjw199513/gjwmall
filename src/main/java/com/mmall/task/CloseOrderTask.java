@@ -99,7 +99,6 @@ public class CloseOrderTask {
         boolean getLock = false;
         try {
             // 最多等待2秒，最多放置5秒
-            // 将waitTime值为0可以防止业务代码执行过短，而导致两个Redisson都获取到锁
             if (getLock = lock.tryLock(0, 5, TimeUnit.SECONDS)) {
                 log.info("Redisson获取分布式锁:{},ThreadName:{}", Const.REDIS_LOCK.CLOSE_ORDER_TASK_LOCK, Thread.currentThread().getName());
                 int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.task.time.hour", "2"));
@@ -119,6 +118,7 @@ public class CloseOrderTask {
             log.info("Redisson分布式锁释放锁");
         }
     }
+    // 将waitTime值为0可以防止业务代码执行过短，而导致两个Redisson都获取到锁
 
     private void closeOrder(String lockName) {
         RedisShardedPoolUtil.expire(lockName, 5); //有效期50秒，防止死锁
