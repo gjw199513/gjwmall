@@ -27,7 +27,9 @@ public class UserManageController {
     @Autowired
     private IUserService iUserService;
 
-    @RequestMapping(value = "login.do", method = RequestMethod.GET)
+
+    @RequestMapping(value = "login.do", method = RequestMethod.POST)
+    // 自动将返回值序列化为json
     @ResponseBody
     public ServerResponse<User> login(String username, String password, HttpSession session, HttpServletResponse httpServletResponse) {
 

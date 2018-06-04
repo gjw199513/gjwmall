@@ -52,6 +52,7 @@ public class CategoryServiceImpl implements ICategoryService {
             return ServerResponse.createByErrorMessage("更新品类参数错误");
         }
         Category category = new Category();
+        // 设置id，只会更新该品类的名字
         category.setId(categoryId);
         category.setName(categoryName);
 
